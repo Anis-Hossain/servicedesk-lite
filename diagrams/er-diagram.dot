@@ -1,0 +1,62 @@
+digraph ER {
+    rankdir=LR;
+    bgcolor="#F6F5F1";
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=11, shape=plaintext];
+    edge [fontname="Helvetica", fontsize=10, color="#6B6F76", fontcolor="#1C1F26"];
+
+    customers [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#2B4C7E" BGCOLOR="#FFFFFF">
+            <TR><TD BGCOLOR="#EDF1F7" ALIGN="CENTER"><B>customers</B></TD></TR>
+            <TR><TD ALIGN="LEFT">PK  id</TD></TR>
+            <TR><TD ALIGN="LEFT">    full_name</TD></TR>
+            <TR><TD ALIGN="LEFT">    email (unique)</TD></TR>
+            <TR><TD ALIGN="LEFT">    phone</TD></TR>
+            <TR><TD ALIGN="LEFT">    company</TD></TR>
+            <TR><TD ALIGN="LEFT">    created_at</TD></TR>
+        </TABLE>
+    >];
+
+    tickets [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#9C6B12" BGCOLOR="#FFFFFF">
+            <TR><TD BGCOLOR="#FBF2DF" ALIGN="CENTER"><B>tickets</B></TD></TR>
+            <TR><TD ALIGN="LEFT">PK  id</TD></TR>
+            <TR><TD ALIGN="LEFT">    subject</TD></TR>
+            <TR><TD ALIGN="LEFT">    description</TD></TR>
+            <TR><TD ALIGN="LEFT">    status</TD></TR>
+            <TR><TD ALIGN="LEFT">    priority</TD></TR>
+            <TR><TD ALIGN="LEFT">FK  customer_id</TD></TR>
+            <TR><TD ALIGN="LEFT">FK  assigned_to_id</TD></TR>
+            <TR><TD ALIGN="LEFT">    created_at</TD></TR>
+            <TR><TD ALIGN="LEFT">    updated_at</TD></TR>
+            <TR><TD ALIGN="LEFT">    resolved_at</TD></TR>
+        </TABLE>
+    >];
+
+    staff_users [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#2F6F4F" BGCOLOR="#FFFFFF">
+            <TR><TD BGCOLOR="#E8F2EC" ALIGN="CENTER"><B>staff_users</B></TD></TR>
+            <TR><TD ALIGN="LEFT">PK  id</TD></TR>
+            <TR><TD ALIGN="LEFT">    full_name</TD></TR>
+            <TR><TD ALIGN="LEFT">    email (unique)</TD></TR>
+            <TR><TD ALIGN="LEFT">    password_hash</TD></TR>
+            <TR><TD ALIGN="LEFT">    role (AGENT/ADMIN)</TD></TR>
+            <TR><TD ALIGN="LEFT">    created_at</TD></TR>
+        </TABLE>
+    >];
+
+    ticket_comments [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#C4622D" BGCOLOR="#FFFFFF">
+            <TR><TD BGCOLOR="#FBEEE6" ALIGN="CENTER"><B>ticket_comments</B></TD></TR>
+            <TR><TD ALIGN="LEFT">PK  id</TD></TR>
+            <TR><TD ALIGN="LEFT">FK  ticket_id</TD></TR>
+            <TR><TD ALIGN="LEFT">    author_name</TD></TR>
+            <TR><TD ALIGN="LEFT">    message</TD></TR>
+            <TR><TD ALIGN="LEFT">    created_at</TD></TR>
+        </TABLE>
+    >];
+
+    customers -> tickets [label="  1 to many\n  (customer_id)", color="#2B4C7E", fontcolor="#1D3A63"];
+    staff_users -> tickets [label="  1 to many\n  (assigned_to_id, nullable)", color="#2F6F4F", fontcolor="#1E4A34"];
+    tickets -> ticket_comments [label="  1 to many\n  (ticket_id)", color="#C4622D", fontcolor="#C4622D"];
+}

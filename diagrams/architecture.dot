@@ -1,0 +1,49 @@
+digraph Architecture {
+    rankdir=LR;
+    bgcolor="#F6F5F1";
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=12, shape=box, style="rounded,filled", margin="0.25,0.15"];
+    edge [fontname="Helvetica", fontsize=10, color="#6B6F76", fontcolor="#1C1F26"];
+
+    User [label="Support Staff\n(Browser)", shape=oval, fillcolor="#FFFFFF", color="#2B4C7E", penwidth=2];
+
+    subgraph cluster_frontend {
+        label="Frontend Container";
+        style="rounded,filled";
+        fillcolor="#EDF1F7";
+        color="#2B4C7E";
+        fontcolor="#1D3A63";
+
+        FE [label="Next.js App\n(Login, Dashboard,\nTickets, Customers, Reports)", fillcolor="#FFFFFF", color="#2B4C7E"];
+    }
+
+    subgraph cluster_backend {
+        label="Backend Container";
+        style="rounded,filled";
+        fillcolor="#FBF2DF";
+        color="#9C6B12";
+        fontcolor="#7A5410";
+
+        API [label="Spring Boot\nREST API", fillcolor="#FFFFFF", color="#9C6B12"];
+        SEC [label="JWT Auth Filter\n+ Validation", fillcolor="#FFFFFF", color="#9C6B12"];
+        SVC [label="Service Layer\n(Business Logic)", fillcolor="#FFFFFF", color="#9C6B12"];
+        SWG [label="Swagger / OpenAPI\n/swagger-ui.html", fillcolor="#FFFFFF", color="#9C6B12"];
+    }
+
+    subgraph cluster_db {
+        label="Database Container";
+        style="rounded,filled";
+        fillcolor="#E8F2EC";
+        color="#2F6F4F";
+        fontcolor="#1E4A34";
+
+        DB [label="PostgreSQL\n(customers, tickets,\nstaff_users, ticket_comments)", fillcolor="#FFFFFF", color="#2F6F4F"];
+    }
+
+    User -> FE [label="HTTPS"];
+    FE -> API [label="REST / JSON\n(Bearer token)"];
+    API -> SEC [style=dashed, dir=none];
+    API -> SVC [style=dashed, dir=none];
+    API -> SWG [style=dashed, dir=none];
+    SVC -> DB [label="JPA / Hibernate"];
+}
