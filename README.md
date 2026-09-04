@@ -8,7 +8,7 @@ A customer support & ticket management system built for the full-stack internshi
 
 ## 1. Project Overview
 
-ServiceDesk Lite has 8 pages:
+ServiceDesk Lite has 7 pages:
 
 | Page | Route | Purpose |
 |---|---|---|
@@ -19,7 +19,6 @@ ServiceDesk Lite has 8 pages:
 | Create Ticket | `/tickets/new` | New ticket form |
 | Customer List | `/customers` | Searchable customer directory |
 | Customer Details | `/customers/[id]` | Customer profile + ticket history |
-| Team & Reports | `/reports` | Staff workload and resolution-rate report (the optional 8th page) |
 
 Demo data (6 customers, 3 staff, 12 tickets with comments) is seeded automatically on first backend startup — no manual setup needed to try it out.
 
@@ -152,7 +151,7 @@ servicedesk-lite/
 │   └── Dockerfile
 ├── frontend/                 Next.js app (App Router, TypeScript, Tailwind)
 │   └── src/
-│       ├── app/               Pages (login, dashboard, tickets, customers, reports)
+│       ├── app/               Pages (login, dashboard, tickets, customers)
 │       ├── components/        Shared UI (AppShell, badges, form primitives)
 │       └── lib/                API client, auth context, toast notifications, types
 ├── diagrams/                  Architecture and ER diagrams (PNG + source .dot files)
@@ -178,4 +177,4 @@ servicedesk-lite/
 - **No staff self-registration UI** — staff accounts are seeded directly; adding an admin "manage team" screen was left out to stay focused on the required scope.
 - **Ticket "activity" is a single comment/note stream**, not a full audit log of every field change (e.g., status changes aren't separately logged as activity entries, only as a state change).
 - Passwords are hashed with BCrypt; the demo `JWT_SECRET` in `docker-compose.yml` is a placeholder — replace it before any real deployment.
-- Optional 8th page implemented as **Team & Reports**: shows per-agent open-ticket workload and an overall resolution rate, computed from live data.
+- The optional 8th page (a reports/team-overview screen) was intentionally left out to keep the submission scoped to the 7 required pages. The `GET /api/staff` endpoint that would have powered it is still implemented and used for ticket assignment, and is documented in Swagger if you'd like to build that page later.
