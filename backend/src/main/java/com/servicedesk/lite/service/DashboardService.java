@@ -6,12 +6,14 @@ import com.servicedesk.lite.enums.TicketPriority;
 import com.servicedesk.lite.enums.TicketStatus;
 import com.servicedesk.lite.repository.TicketRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional(readOnly = true)
 public class DashboardService {
 
     private final TicketRepository ticketRepository;

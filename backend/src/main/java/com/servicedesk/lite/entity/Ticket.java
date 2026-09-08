@@ -27,8 +27,7 @@ public class Ticket {
     @Column(nullable = false)
     private String subject;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
