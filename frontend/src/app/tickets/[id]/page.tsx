@@ -12,6 +12,7 @@ import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@/lib/auth-context";
 import {
   addTicketComment,
+  ApiError,
   deleteTicket,
   getTicket,
   listStaff,
@@ -94,8 +95,11 @@ export default function TicketDetailsPage() {
       await deleteTicket(ticket.id);
       show("Ticket deleted", "success");
       router.push("/tickets");
-    } catch {
-      show("Couldn't delete the ticket. Please try again.", "error");
+    } catch (err) {
+      const message = err instanceof ApiError && err.status === 403
+        ? "Only admins can delete tickets."
+        : "Couldn't delete the ticket. Please try again.";
+      show(message, "error");
       setDeleting(false);
     }
   }
@@ -124,9 +128,11 @@ export default function TicketDetailsPage() {
                     Ticket #{ticket.id} · Created {new Date(ticket.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-                  <Trash2 size={15} />
-                </Button>
+                {user?.role === "ADMIN" && (
+                  <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+                    <Trash2 size={15} />
+                  </Button>
+                )}
               </div>
               <p className="text-sm text-ink mt-4 whitespace-pre-wrap">{ticket.description}</p>
             </Card>
