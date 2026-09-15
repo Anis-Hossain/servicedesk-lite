@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,7 +71,8 @@ public class TicketController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete ticket", description = "Permanently deletes a ticket")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete ticket", description = "Permanently deletes a ticket. Admin role required.")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         ticketService.delete(id);
         return ResponseEntity.noContent().build();
