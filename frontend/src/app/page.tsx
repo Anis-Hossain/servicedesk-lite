@@ -7,7 +7,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("sdl_token") : null;
+    const token = typeof window !== "undefined" ? localStorage.getItem("sdl_access_token") : null;
     router.replace(token ? "/dashboard" : "/login");
   }, [router]);
 

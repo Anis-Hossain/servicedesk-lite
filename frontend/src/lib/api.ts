@@ -21,13 +21,52 @@ export class ApiError extends Error {
   }
 }
 
-function getToken(): string | null {
+function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("sdl_token");
+  return localStorage.getItem("sdl_access_token");
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
+function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("sdl_refresh_token");
+}
+
+function clearSession() {
+  localStorage.removeItem("sdl_access_token");
+  localStorage.removeItem("sdl_refresh_token");
+  localStorage.removeItem("sdl_user");
+}
+
+// Prevents multiple simultaneous refresh calls if several requests 401 at once -
+// every caller awaits the same in-flight refresh instead of each starting their own.
+let refreshPromise: Promise<string | null> | null = null;
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
+
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${API_BASE}/api/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    })
+      .then(async (res) => {
+        if (!res.ok) return null;
+        const data = await res.json();
+        localStorage.setItem("sdl_access_token", data.accessToken);
+        return data.accessToken as string;
+      })
+      .catch(() => null)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+async function request<T>(path: string, options: RequestInit = {}, isRetry = false): Promise<T> {
+  const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
@@ -43,10 +82,19 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    if (res.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("sdl_token");
-      localStorage.removeItem("sdl_user");
-      window.location.href = "/login";
+    if (res.status === 401 && !isRetry && path !== "/api/auth/refresh") {
+      const newAccessToken = await refreshAccessToken();
+      if (newAccessToken) {
+        // Access token had simply expired (its 2-minute lifetime is intentionally
+        // short for demo purposes) - the refresh token was still valid, so we got a
+        // new access token silently and can retry the original request once, seamlessly.
+        return request<T>(path, options, true);
+      }
+      // Refresh token itself is missing/invalid/expired - a real re-login is needed.
+      if (typeof window !== "undefined") {
+        clearSession();
+        window.location.href = "/login";
+      }
     }
     throw new ApiError(data as ApiErrorBody, res.status);
   }
@@ -56,7 +104,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ---- Auth ----
 export function login(email: string, password: string) {
-  return request<{ token: string; fullName: string; email: string; role: string }>(
+  return request<{ accessToken: string; refreshToken: string; fullName: string; email: string; role: string }>(
     "/api/auth/login",
     { method: "POST", body: JSON.stringify({ email, password }) }
   );
