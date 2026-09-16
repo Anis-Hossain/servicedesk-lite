@@ -6,11 +6,13 @@ import { Plus, Search, X } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { Button, Card, EmptyState, ErrorState, Input, Label, LoadingState, PageHeader } from "@/components/ui";
 import { useToast } from "@/lib/toast-context";
+import { useAuth } from "@/lib/auth-context";
 import { createCustomer, listCustomers } from "@/lib/api";
 import type { Customer } from "@/lib/types";
 
 export default function CustomersPage() {
   const { show } = useToast();
+  const { user } = useAuth();
   const [customers, setCustomers] = useState<Customer[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,9 +43,11 @@ export default function CustomersPage() {
         title="Customers"
         description="Everyone you provide support to"
         actions={
-          <Button onClick={() => setShowForm((v) => !v)}>
-            <Plus size={15} /> New Customer
-          </Button>
+          user?.role === "ADMIN" ? (
+            <Button onClick={() => setShowForm((v) => !v)}>
+              <Plus size={15} /> New Customer
+            </Button>
+          ) : undefined
         }
       />
 
