@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (jwtService.isTokenValid(token)) {
+        if (jwtService.isValidAccessToken(token)) {
             String email = jwtService.extractEmail(token);
             Optional<StaffUser> user = staffUserRepository.findByEmailIgnoreCase(email);
 
