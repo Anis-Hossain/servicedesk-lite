@@ -163,7 +163,8 @@ servicedesk-lite/
 
 ## 9. Key Design Decisions
 
-- **Auth:** stateless JWT bearer tokens issued on login, validated on each request by a `OncePerRequestFilter`. Tokens are stored in `localStorage` on the frontend and attached to every API call.
+- **Auth:** stateless JWT **access + refresh token pair** issued on login, validated on each request by a `OncePerRequestFilter`. The access token is short-lived (2 minutes, intentionally short for easy demonstration — see `application.yml`) and sent on every API call; the refresh token is long-lived (7 days) and only ever sent to `POST /api/auth/refresh` to silently obtain a new access token when the old one expires. Both are JWTs carrying a `type` claim (`access`/`refresh`) so one can never be used in place of the other. All tokens are stored in `localStorage` on the frontend.
+- **Role-based access control:** `AGENT` and `ADMIN` roles are enforced via Spring Security `@PreAuthorize`, not just stored as a label. Admin-only actions: deleting a ticket, deleting a customer, creating a customer, editing a customer's profile, and the full ticket-edit endpoint (`PUT /api/tickets/{id}`). Agents can still do their core day-to-day work — creating tickets, changing ticket status, adding comments — none of that is restricted.
 - **Status workflow:** `OPEN → IN_PROGRESS → WAITING_FOR_CUSTOMER → RESOLVED`. Setting a ticket to `RESOLVED` stamps `resolvedAt`; moving it off `RESOLVED` clears that stamp.
 - **Dashboard data** is computed live from the database on every request (ticket counts, priority breakdown, 5 most recent tickets) — never hard-coded.
 - **Validation** happens on both ends: the frontend blocks obviously invalid submissions before they're sent, and the backend independently validates every request with Bean Validation, returning structured `400` errors with field-level messages.
@@ -173,7 +174,7 @@ servicedesk-lite/
 
 ## 10. Assumptions, Limitations & Notes
 
-- **Roles are stored but not yet used for authorization** — both `AGENT` and `ADMIN` currently have the same permissions. In a real production system, admin-only actions (e.g., deleting tickets, managing staff accounts) would be gated by role.
+- **Roles are now enforced for the most sensitive actions** (see the "Role-based access control" note above), but not exhaustively — most read/write actions remain open to any logged-in staff member, matching how a small real support team would actually want day-to-day work to flow.
 - **No staff self-registration UI** — staff accounts are seeded directly; adding an admin "manage team" screen was left out to stay focused on the required scope.
 - **Ticket "activity" is a single comment/note stream**, not a full audit log of every field change (e.g., status changes aren't separately logged as activity entries, only as a state change).
 - Passwords are hashed with BCrypt; the demo `JWT_SECRET` in `docker-compose.yml` is a placeholder — replace it before any real deployment.
