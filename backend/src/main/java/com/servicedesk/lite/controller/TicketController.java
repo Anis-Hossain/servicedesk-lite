@@ -52,7 +52,8 @@ public class TicketController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update ticket", description = "Updates the details of an existing ticket")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update ticket", description = "Updates the full details of an existing ticket (subject, description, customer, assignee). Admin role required. Agents should use the status/comment endpoints for day-to-day ticket work.")
     public ResponseEntity<TicketResponse> update(@PathVariable Long id, @Valid @RequestBody TicketRequest request) {
         return ResponseEntity.ok(ticketService.update(id, request));
     }

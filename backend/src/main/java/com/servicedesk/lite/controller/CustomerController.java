@@ -47,13 +47,15 @@ public class CustomerController {
     }
 
     @PostMapping
-    @Operation(summary = "Create customer", description = "Registers a new customer")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create customer", description = "Registers a new customer. Admin role required.")
     public ResponseEntity<CustomerResponse> create(@Valid @RequestBody CustomerRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.create(request));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update customer", description = "Updates an existing customer's profile")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update customer", description = "Updates an existing customer's profile. Admin role required.")
     public ResponseEntity<CustomerResponse> update(@PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
         return ResponseEntity.ok(customerService.update(id, request));
     }
