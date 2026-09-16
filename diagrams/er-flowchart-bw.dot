@@ -1,0 +1,20 @@
+digraph ERFlow {
+    rankdir=TB;
+    bgcolor="#FFFFFF";
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=13, shape=box, style="rounded", color="#000000", fontcolor="#000000", penwidth=1.5, margin="0.25,0.15"];
+    edge [fontname="Helvetica", fontsize=11, color="#000000", fontcolor="#000000", penwidth=1.2];
+
+    Customer [label="Customer\nsubmits an issue"];
+    Ticket [label="Ticket\ncreated (Open)"];
+    Staff [label="Staff Member\ngets assigned"];
+    InProgress [label="Ticket\nworked on"];
+    Comment [label="Comment\nadded to ticket"];
+    Resolved [label="Ticket\nResolved"];
+
+    Customer -> Ticket [label="creates"];
+    Ticket -> Staff [label="assigned to"];
+    Staff -> InProgress [label="updates status"];
+    InProgress -> Comment [label="logs a note"];
+    Comment -> Resolved [label="until"];
+}
