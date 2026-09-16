@@ -27,8 +27,7 @@ public class TicketComment {
     @Column(nullable = false)
     private String authorName;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Builder.Default

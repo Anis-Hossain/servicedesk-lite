@@ -9,12 +9,14 @@ import { Button, Card, ErrorState, Input, Label, LoadingState, PageHeader } from
 import StatusBadge from "@/components/StatusBadge";
 import PriorityBadge from "@/components/PriorityBadge";
 import { useToast } from "@/lib/toast-context";
+import { useAuth } from "@/lib/auth-context";
 import { getCustomer, getCustomerTickets, updateCustomer } from "@/lib/api";
 import type { Customer, Ticket } from "@/lib/types";
 
 export default function CustomerDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { show } = useToast();
+  const { user } = useAuth();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -69,9 +71,11 @@ export default function CustomerDetailsPage() {
                   <PageHeader
                     title={customer.fullName}
                     actions={
-                      <Button variant="secondary" onClick={() => setEditing(true)}>
-                        Edit
-                      </Button>
+                      user?.role === "ADMIN" ? (
+                        <Button variant="secondary" onClick={() => setEditing(true)}>
+                          Edit
+                        </Button>
+                      ) : undefined
                     }
                   />
                   <dl className="space-y-3 text-sm -mt-4">
@@ -188,8 +192,8 @@ function EditCustomerForm({
         company: company.trim(),
       });
       onSaved(updated);
-    } catch {
-      show("Couldn't save changes. Please try again.", "error");
+    } catch (err: any) {
+      show(err?.message || "Couldn't save changes. Please try again.", "error");
     } finally {
       setSubmitting(false);
     }

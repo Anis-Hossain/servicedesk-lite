@@ -34,13 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const res = await apiLogin(email, password);
     const currentUser: CurrentUser = { fullName: res.fullName, email: res.email, role: res.role };
-    localStorage.setItem("sdl_token", res.token);
+    localStorage.setItem("sdl_access_token", res.accessToken);
+    localStorage.setItem("sdl_refresh_token", res.refreshToken);
     localStorage.setItem("sdl_user", JSON.stringify(currentUser));
     setUser(currentUser);
   }
 
   function logout() {
-    localStorage.removeItem("sdl_token");
+    localStorage.removeItem("sdl_access_token");
+    localStorage.removeItem("sdl_refresh_token");
     localStorage.removeItem("sdl_user");
     setUser(null);
     router.push("/login");

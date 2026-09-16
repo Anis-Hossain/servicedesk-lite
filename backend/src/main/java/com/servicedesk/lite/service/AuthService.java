@@ -3,6 +3,7 @@ package com.servicedesk.lite.service;
 import com.servicedesk.lite.config.JwtService;
 import com.servicedesk.lite.dto.LoginRequest;
 import com.servicedesk.lite.dto.LoginResponse;
+import com.servicedesk.lite.dto.RefreshResponse;
 import com.servicedesk.lite.entity.StaffUser;
 import com.servicedesk.lite.exception.InvalidCredentialsException;
 import com.servicedesk.lite.repository.StaffUserRepository;
@@ -30,7 +31,26 @@ public class AuthService {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new LoginResponse(token, user.getFullName(), user.getEmail(), user.getRole().name());
+        String accessToken = jwtService.generateAccessToken(user.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+        return new LoginResponse(accessToken, refreshToken, user.getFullName(), user.getEmail(), user.getRole().name());
+    }
+
+    /**
+     * Exchanges a valid, unexpired REFRESH token for a brand-new ACCESS token.
+     * The refresh token itself is not rotated/reissued here - it stays valid until its
+     * own (longer) expiry, keeping this exchange intentionally simple.
+     */
+    public RefreshResponse refresh(String refreshToken) {
+        if (!jwtService.isValidRefreshToken(refreshToken)) {
+            throw new InvalidCredentialsException("Refresh token is invalid or expired");
+        }
+
+        String email = jwtService.extractEmail(refreshToken);
+        StaffUser user = staffUserRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new InvalidCredentialsException("Refresh token is invalid or expired"));
+
+        String newAccessToken = jwtService.generateAccessToken(user.getEmail());
+        return new RefreshResponse(newAccessToken);
     }
 }
